@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { GALAXIES, GALAXY_SLUGS } from "@/lib/galaxies";
+import SpatialView from "./SpatialView";
 
 /* localStorage persistence (fine outside claude.ai artifacts) */
 const store = {
@@ -65,6 +66,7 @@ export default function Desktop() {
     return base;
   });
   const [hydrated, setHydrated] = useState(false);
+  const [spatialOpen, setSpatialOpen] = useState(false);
   const topZ = useRef(10);
   useEffect(() => {
     const saved = store.get("wm", null);
@@ -360,6 +362,12 @@ export default function Desktop() {
           <small>EVERYTHING · ORANGOPUS</small>
         </div>
         <div className="topbar-right">
+          <button className="spatial-trigger" onClick={() => setSpatialOpen(true)}>
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
+              <path d="M8 1.5 14 5 8 8.5 2 5Z" /><path d="M2 5v6l6 3.5 6-3.5V5" /><path d="M8 8.5v6" />
+            </svg>
+            Spatial
+          </button>
           <div className="user-chip" onClick={() => openWin("settings")}>
             {user?.avatar && <img src={user.avatar} alt="" />}
             <span>{user?.login || "preview"}</span>
@@ -471,13 +479,77 @@ export default function Desktop() {
           {APP_IDS.map(id => (
             <div key={id} className="dock-item" data-active={wins[id].state === "open"} onClick={() => toggleWin(id)}>
               <div className="dock-tip">{APPS[id].title}</div>
-              <span className="dock-glyph" style={{ color: APPS[id].color }}>{APPS[id].title[0]}</span>
+              <span className="dock-glyph" style={{ color: APPS[id].color }}><AppIcon id={id} /></span>
             </div>
           ))}
         </div>
       </div>
+
+      {spatialOpen && (
+        <SpatialView
+          appIds={APP_IDS}
+          apps={APPS}
+          wins={wins}
+          reducedMotion={settings.reducedMotion}
+          onSelect={id => { openWin(id); setSpatialOpen(false); }}
+          onClose={() => setSpatialOpen(false)}
+        />
+      )}
     </div>
   );
+}
+
+/* Icons drawn to match what each app actually does, not an arbitrary
+   initial letter: mycelium network for chat, an orbit for galaxies,
+   sliders for the toolbox, a prompt for the shell, a folder, a dial. */
+function AppIcon({ id, size = 16 }) {
+  const p = { fill: "none", stroke: "currentColor", strokeWidth: 1.4, strokeLinecap: "round", strokeLinejoin: "round" };
+  const dot = { fill: "currentColor", stroke: "none" };
+  switch (id) {
+    case "biome": return (
+      <svg width={size} height={size} viewBox="0 0 16 16">
+        <path {...p} d="M8 8 3 4M8 8l5-4M8 8v6M8 8l-5 4M8 8l5 4" />
+        <circle cx="8" cy="8" r="1.3" {...dot} />
+        {[[3, 4], [13, 4], [8, 14], [3, 12], [13, 12]].map(([x, y]) => <circle key={x + "" + y} cx={x} cy={y} r="1" {...dot} />)}
+      </svg>
+    );
+    case "galaxies": return (
+      <svg width={size} height={size} viewBox="0 0 16 16">
+        <ellipse {...p} cx="8" cy="8" rx="7" ry="2.6" transform="rotate(-24 8 8)" />
+        <circle cx="8" cy="8" r="1.2" {...dot} />
+        <circle cx="13.6" cy="5.2" r="1.1" {...dot} />
+      </svg>
+    );
+    case "dynamix": return (
+      <svg width={size} height={size} viewBox="0 0 16 16">
+        <line {...p} x1="4" y1="2" x2="4" y2="14" /><circle cx="4" cy="10" r="1.6" {...dot} />
+        <line {...p} x1="8" y1="2" x2="8" y2="14" /><circle cx="8" cy="5" r="1.6" {...dot} />
+        <line {...p} x1="12" y1="2" x2="12" y2="14" /><circle cx="12" cy="8.5" r="1.6" {...dot} />
+      </svg>
+    );
+    case "terminal": return (
+      <svg width={size} height={size} viewBox="0 0 16 16">
+        <rect {...p} x="1.5" y="2.5" width="13" height="11" rx="2" />
+        <path {...p} d="M4.5 6.3 7 8 4.5 9.7" />
+        <line {...p} x1="8" y1="10.5" x2="11.2" y2="10.5" />
+      </svg>
+    );
+    case "files": return (
+      <svg width={size} height={size} viewBox="0 0 16 16">
+        <path {...p} d="M2 4.8h4l1.2 1.5H14a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5.8a1 1 0 0 1 1-1Z" />
+      </svg>
+    );
+    case "settings": return (
+      <svg width={size} height={size} viewBox="0 0 16 16">
+        <circle {...p} cx="8" cy="8" r="3.2" /><circle cx="8" cy="8" r="1" {...dot} />
+        {[0, 60, 120, 180, 240, 300].map(a => {
+          const r = (a * Math.PI) / 180, c = Math.cos(r), s = Math.sin(r);
+          return <line key={a} {...p} x1={8 + c * 4.6} y1={8 + s * 4.6} x2={8 + c * 6.6} y2={8 + s * 6.6} />;
+        })}
+      </svg>
+    );
+    default: return null;
+  }
 }
 
 function Clock() {
