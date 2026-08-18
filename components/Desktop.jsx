@@ -326,12 +326,12 @@ export default function Desktop() {
   /* ---------- render ---------- */
   const accent = settings.accent === "violet" ? "#a473ff" : "#4ff0d3";
 
-  if (authState === "checking") return <div className="bootscreen"><div className="wordmark"><span className="o">e</span><span className="os">OS</span></div></div>;
+  if (authState === "checking") return <div className="bootscreen"><div className="wordmark"><span className="o">everything</span><span className="os">OS</span></div></div>;
 
   if (authState === "gate") return (
     <div className="bootscreen">
       <div className="authcard">
-        <div className="wordmark"><span className="o">e</span><span className="os">OS</span></div>
+        <div className="wordmark"><span className="o">everything</span><span className="os">OS</span></div>
         <p className="authmsg">Sign in with GitHub to open your desktop.</p>
         {authError && <p className="autherr">{AUTH_ERROR_MESSAGES[authError] || `Sign-in failed (${authError}).`}</p>}
         <a className="gh-btn" href="/api/auth/login">
@@ -356,7 +356,7 @@ export default function Desktop() {
     <div className="os-root" style={{ "--accent-cyan": accent }}>
       <div className="topbar">
         <div className="brand">
-          <div className="wordmark"><span className="o">e</span><span className="os">OS</span></div>
+          <div className="wordmark"><span className="o">everything</span><span className="os">OS</span></div>
           <small>EVERYTHING · ORANGOPUS</small>
         </div>
         <div className="topbar-right">
