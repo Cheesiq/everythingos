@@ -1,0 +1,31 @@
+{
+  "name": "everythingOS dev",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "everythingOS (Next.js dev server)",
+      "onAutoForward": "openPreview"
+    }
+  },
+
+  "postCreateCommand": "npm install && ([ -f .env.local ] || cp .env.example .env.local)",
+  "postStartCommand": "npm run dev",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "editorconfig.editorconfig"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
+    }
+  },
+
+  "remoteUser": "node"
+}
